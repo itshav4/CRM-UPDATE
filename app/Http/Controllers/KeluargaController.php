@@ -76,6 +76,11 @@ class KeluargaController extends Controller
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
             'status' => ['required', 'in:Orang Tua,Ayah,Ibu,Suami,Istri,Anak'],
+            'province_id' => ['nullable', 'string', 'exists:provinces,id'],
+            'regency_id' => ['nullable', 'string', 'exists:regencies,id'],
+            'district_id' => ['nullable', 'string', 'exists:districts,id'],
+            'village_id' => ['nullable', 'string', 'exists:villages,id'],
+            'address' => ['nullable', 'string', 'max:2000'],
         ]);
     }
 
@@ -87,6 +92,15 @@ class KeluargaController extends Controller
             'tempat_lahir' => $keluarga->tempat_lahir,
             'tanggal_lahir' => $keluarga->tanggal_lahir?->format('Y-m-d'),
             'status' => $keluarga->status,
+            'province_id' => $keluarga->province_id,
+            'regency_id' => $keluarga->regency_id,
+            'district_id' => $keluarga->district_id,
+            'village_id' => $keluarga->village_id,
+            'address' => $keluarga->address,
+            'province' => $keluarga->province?->name,
+            'regency' => $keluarga->regency?->name,
+            'district' => $keluarga->district?->name,
+            'village' => $keluarga->village?->name,
         ];
     }
 

@@ -180,6 +180,15 @@
                                         'tempat_lahir' => $keluarga->tempat_lahir,
                                         'tanggal_lahir' => $keluarga->tanggal_lahir ? \Carbon\Carbon::parse($keluarga->tanggal_lahir)->format('Y-m-d') : null,
                                         'status' => $keluarga->status,
+                                        'province_id' => $keluarga->province_id,
+                                        'regency_id' => $keluarga->regency_id,
+                                        'district_id' => $keluarga->district_id,
+                                        'village_id' => $keluarga->village_id,
+                                        'address' => $keluarga->address,
+                                        'province' => $keluarga->province?->name,
+                                        'regency' => $keluarga->regency?->name,
+                                        'district' => $keluarga->district?->name,
+                                        'village' => $keluarga->village?->name,
                                     ];
                                 })->values()->toJson();
                             @endphp
@@ -225,6 +234,11 @@
                                     'tempat_lahir' => $keluarga->tempat_lahir,
                                     'tanggal_lahir' => $keluarga->tanggal_lahir ? \Carbon\Carbon::parse($keluarga->tanggal_lahir)->format('Y-m-d') : null,
                                     'status' => $keluarga->status,
+                                        'province_id' => $keluarga->province_id,
+                                        'regency_id' => $keluarga->regency_id,
+                                        'district_id' => $keluarga->district_id,
+                                        'village_id' => $keluarga->village_id,
+                                        'address' => $keluarga->address,
                                 ];
                             })->values()->toJson();
                         @endphp
@@ -291,7 +305,7 @@
 
 <!-- ==================== Modal CRUD Keluarga ==================== -->
 <div id="hrdKeluargaModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
+    <div class="bg-white rounded-xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl">
         <div class="shrink-0 px-5 py-4 rounded-t-xl text-white flex justify-between items-center bg-emerald-700">
             <div>
                 <h2 class="font-semibold"><i class="fas fa-people-roof mr-2"></i>Data Keluarga</h2>
@@ -305,7 +319,7 @@
             </div>
         </div>
         <div id="hrdKeluargaToast" class="hidden mx-5 mt-4 rounded-lg border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
-        <div id="hrdKeluargaList" class="min-h-0 overflow-y-auto p-5 space-y-2"></div>
+        <div id="hrdKeluargaList" class="min-h-0 overflow-y-auto p-5 space-y-3"></div>
     </div>
 </div>
 
@@ -343,6 +357,42 @@
                     </select>
                 </div>
             </div>
+            <section class="space-y-3 border-t border-gray-200 pt-4">
+                <h3 class="text-sm font-semibold text-gray-800"><i class="fas fa-map-marker-alt mr-1 text-red-500"></i>Alamat Tempat Lahir</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="hrdFamilyProvince" class="block text-sm font-medium text-gray-700">Provinsi</label>
+                        <select id="hrdFamilyProvince" name="province_id" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                            <option value="">-- Pilih Provinsi --</option>
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="hrdFamilyRegency" class="block text-sm font-medium text-gray-700">Kabupaten/Kota</label>
+                        <select id="hrdFamilyRegency" name="regency_id" disabled class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100">
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="hrdFamilyDistrict" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                        <select id="hrdFamilyDistrict" name="district_id" disabled class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100">
+                            <option value="">-- Pilih Kecamatan --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="hrdFamilyVillage" class="block text-sm font-medium text-gray-700">Kelurahan/Desa</label>
+                        <select id="hrdFamilyVillage" name="village_id" disabled class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100">
+                            <option value="">-- Pilih Kelurahan/Desa --</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="hrdFamilyAddress" class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
+                        <textarea id="hrdFamilyAddress" name="address" rows="2" placeholder="Masukkan alamat lengkap..." class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm"></textarea>
+                    </div>
+                </div>
+            </section>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeHrdKeluargaForm()" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700">Batal</button>
                 <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"><i class="fas fa-save mr-1"></i>Simpan</button>
@@ -770,7 +820,8 @@
 </div>
 
 {{-- ==================== Script ==================== --}}
-<script>
+<script src="{{ asset('js/address-cascade.js') }}"></script>
+    <script>
 /* ============ Riwayat Pendidikan ============ */
 const INP = 'w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm';
 const JENJANG = ['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S2', 'S3'];
@@ -1198,6 +1249,7 @@ document.querySelectorAll('[data-sort-column]').forEach(button => {
         renderHrdPagination();
 
 const hrdKeluargaState = { karyawanId: null, records: [] };
+let hrdFamilyAddressCascade = null;
 
 function hrdKeluargaStatusClass(status) {
     return status === 'Suami' ? 'bg-blue-100 text-blue-800' :
@@ -1216,22 +1268,29 @@ function renderHrdKeluargaList() {
         return;
     }
 
-    list.innerHTML = hrdKeluargaState.records.map(record => `
-        <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
-            <div class="min-w-0">
-                <div class="font-medium text-sm text-gray-800">${escapeHtml(record.nama)}</div>
-                <div class="text-xs text-gray-500">${escapeHtml(record.tempat_lahir)}, ${hrdFormatTanggal(record.tanggal_lahir)} &middot; ${hitungUsia(record.tanggal_lahir)} </div>
-            </div>
-            <div class="flex items-center gap-3 shrink-0">
-                <span class="rounded-full px-2 py-1 text-xs font-medium ${hrdKeluargaStatusClass(record.status)}">${escapeHtml(record.status)}</span>
-                <button type="button" onclick="editHrdKeluarga(${record.id})" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fas fa-edit"></i></button>
-                <form action="/keluarga/${record.id}" method="POST" class="inline" onsubmit="openHrdKeluargaDelete(event, this)">
-                    @csrf
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="text-red-600 hover:text-red-800" title="Hapus"><i class="fas fa-trash"></i></button>
-                </form>
-            </div>
-        </div>`).join('');
+    list.innerHTML = hrdKeluargaState.records.map(record => {
+        const addressParts = [record.address, record.village, record.district, record.regency, record.province]
+            .filter(value => String(value || '').trim());
+        const addressText = addressParts.length ? addressParts.join(', ') : '';
+
+        return `
+            <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="min-w-0">
+                    <div class="font-medium text-sm text-gray-800">${escapeHtml(record.nama)}</div>
+                    <div class="text-xs text-gray-500">${escapeHtml(record.tempat_lahir)}, ${hrdFormatTanggal(record.tanggal_lahir)} &middot; ${hitungUsia(record.tanggal_lahir)} </div>
+                    ${addressText ? `<div class="mt-1 text-xs text-gray-500"><i class="fas fa-location-dot mr-1 text-red-500"></i>${escapeHtml(addressText)}</div>` : ''}
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                    <span class="rounded-full px-2 py-1 text-xs font-medium ${hrdKeluargaStatusClass(record.status)}">${escapeHtml(record.status)}</span>
+                    <button type="button" onclick="editHrdKeluarga(${record.id})" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fas fa-edit"></i></button>
+                    <form action="/keluarga/${record.id}" method="POST" class="inline" onsubmit="openHrdKeluargaDelete(event, this)">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="text-red-600 hover:text-red-800" title="Hapus"><i class="fas fa-trash"></i></button>
+                    </form>
+                </div>
+            </div>`;
+    }).join('');
 }
 
 function openHrdKeluargaModal(button) {
@@ -1249,17 +1308,40 @@ function openHrdKeluargaForm() {
     openHrdKeluargaFormModal();
 }
 
-function openHrdKeluargaFormModal() {
+function initHrdFamilyAddressCascade() {
+    if (hrdFamilyAddressCascade) hrdFamilyAddressCascade.destroy();
+
+    hrdFamilyAddressCascade = new AddressCascade({
+        provinceId: 'hrdFamilyProvince',
+        regencyId: 'hrdFamilyRegency',
+        districtId: 'hrdFamilyDistrict',
+        villageId: 'hrdFamilyVillage',
+        baseUrl: '/',
+    });
+    hrdFamilyAddressCascade.resetAll();
+}
+
+async function openHrdKeluargaFormModal(address = null) {
     const modal = document.getElementById('hrdKeluargaFormModal');
     const card = document.getElementById('hrdKeluargaFormCard');
     modal.classList.remove('hidden');
+    initHrdFamilyAddressCascade();
     requestAnimationFrame(() => {
         modal.classList.remove('opacity-0');
         card.classList.remove('scale-95', 'opacity-0');
     });
+
+    if (address?.province_id) {
+        await hrdFamilyAddressCascade.loadWithValues(
+            address.province_id,
+            address.regency_id,
+            address.district_id,
+            address.village_id,
+        );
+    }
 }
 
-function editHrdKeluarga(id) {
+async function editHrdKeluarga(id) {
     const record = hrdKeluargaState.records.find(item => item.id === id);
     if (!record) return;
     document.getElementById('hrdKeluargaForm').action = `/keluarga/${id}`;
@@ -1270,7 +1352,8 @@ function editHrdKeluarga(id) {
     document.getElementById('hrdKeluargaTanggal').value = normalisasiTanggal(record.tanggal_lahir);
     document.getElementById('hrdKeluargaUsia').value = hitungUsia(record.tanggal_lahir);
     document.getElementById('hrdKeluargaStatus').value = record.status;
-    openHrdKeluargaFormModal();
+    document.getElementById('hrdFamilyAddress').value = record.address || '';
+    await openHrdKeluargaFormModal(record);
 }
 
 function resetHrdKeluargaForm() {
@@ -1280,6 +1363,7 @@ function resetHrdKeluargaForm() {
     document.getElementById('hrdKeluargaMethod').value = 'POST';
     document.getElementById('hrdKeluargaFormTitle').innerHTML = '<i class="fas fa-plus-circle mr-2"></i>Tambah Anggota Keluarga';
     document.getElementById('hrdKeluargaUsia').value = '';
+    document.getElementById('hrdFamilyAddress').value = '';
 }
 
 function closeHrdKeluargaModal() {
@@ -1293,6 +1377,10 @@ function closeHrdKeluargaForm() {
     modal.classList.add('opacity-0');
     card.classList.add('scale-95', 'opacity-0');
     setTimeout(() => modal.classList.add('hidden'), 200);
+    if (hrdFamilyAddressCascade) {
+        hrdFamilyAddressCascade.destroy();
+        hrdFamilyAddressCascade = null;
+    }
 }
 
 function showHrdKeluargaToast(message, type = 'success') {
@@ -1395,6 +1483,15 @@ document.getElementById('hrdKeluargaForm').addEventListener('submit', async func
             tempat_lahir: saved.tempat_lahir,
             tanggal_lahir: saved.tanggal_lahir,
             status: saved.status,
+            province_id: saved.province_id,
+            regency_id: saved.regency_id,
+            district_id: saved.district_id,
+            village_id: saved.village_id,
+            address: saved.address,
+            province: saved.province,
+            regency: saved.regency,
+            district: saved.district,
+            village: saved.village,
         };
         const existingIndex = hrdKeluargaState.records.findIndex(record => record.id === savedRecord.id);
         if (existingIndex >= 0) hrdKeluargaState.records[existingIndex] = savedRecord;

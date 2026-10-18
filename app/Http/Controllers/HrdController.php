@@ -6,6 +6,7 @@ use App\Models\Kandidat;
 use App\Models\Karyawan;
 use App\Models\Keluarga;
 use App\Models\RiwayatPendidikan;
+use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +17,17 @@ class HrdController extends Controller
     /* ---------------- INDEX ---------------- */
     public function index()
     {
-        $kandidat = Kandidat::with(['pendidikan', 'karyawan', 'keluarga'])->latest()->get();
-        return view('hrd.index', compact('kandidat'));
+        $kandidat = Kandidat::with([
+            'pendidikan',
+            'keluarga',
+            'karyawan.keluarga.province',
+            'karyawan.keluarga.regency',
+            'karyawan.keluarga.district',
+            'karyawan.keluarga.village',
+        ])->latest()->get();
+        $provinces = Province::orderBy('name')->get(['id', 'name']);
+
+        return view('hrd.index', compact('kandidat', 'provinces'));
     }
 
     /* ---------------- RULES ---------------- */
@@ -309,6 +319,7 @@ class HrdController extends Controller
             foreach ($kandidat->keluarga as $keluarga) {
                 $karyawan->keluarga()->create($keluarga->only([
                     'nama', 'tempat_lahir', 'tanggal_lahir', 'status',
+                    'province_id', 'regency_id', 'district_id', 'village_id', 'address',
                 ]));
             }
         });
