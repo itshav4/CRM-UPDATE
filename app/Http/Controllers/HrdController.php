@@ -19,7 +19,12 @@ class HrdController extends Controller
     {
         $kandidat = Kandidat::with([
             'pendidikan',
+            'pengalamanKerja',
+            'sertifikasi',
             'keluarga',
+            'karyawan.pendidikan',
+            'karyawan.pengalamanKerja',
+            'karyawan.sertifikasi',
             'karyawan.keluarga.province',
             'karyawan.keluarga.regency',
             'karyawan.keluarga.district',
@@ -249,6 +254,7 @@ class HrdController extends Controller
         $kandidat = Kandidat::findOrFail($id);
 
         $files = array_filter([$kandidat->foto, $kandidat->scan_ktp, $kandidat->cv]);
+        $certificateFiles = $kandidat->sertifikasi()->pluck('file_sertifikat')->all();
 
         DB::transaction(function () use ($kandidat) {
             $kandidat->pendidikan()->delete();
@@ -257,6 +263,7 @@ class HrdController extends Controller
         });
 
         foreach ($files as $path) Storage::disk('public')->delete($path);
+        foreach ($certificateFiles as $path) Storage::disk('public')->delete($path);
 
         return redirect()->route('hrd.index')->with('success', 'Data berhasil dihapus!');
     }
@@ -292,7 +299,7 @@ class HrdController extends Controller
             return;
         }
 
-        $kandidat->loadMissing(['pendidikan', 'keluarga']);
+        $kandidat->loadMissing(['pendidikan', 'keluarga', 'pengalamanKerja', 'sertifikasi']);
 
         DB::transaction(function () use ($kandidat, $tanggalMasuk, $departemenId) {
             $karyawan = $kandidat->karyawan()->create([
@@ -322,6 +329,15 @@ class HrdController extends Controller
                     'province_id', 'regency_id', 'district_id', 'village_id', 'address',
                 ]));
             }
+
+            $kandidat->pengalamanKerja()->update([
+                'karyawan_id' => $karyawan->id,
+                'kandidat_id' => null,
+            ]);
+            $kandidat->sertifikasi()->update([
+                'karyawan_id' => $karyawan->id,
+                'kandidat_id' => null,
+            ]);
         });
     }
 }

@@ -39,5 +39,15 @@ public function keluarga()
     return $this->hasMany(Keluarga::class, 'kandidat_id');
 }
 
+public function pengalamanKerja()
+{
+    return $this->hasMany(PengalamanKerja::class, 'kandidat_id');
+}
+
+public function sertifikasi()
+{
+    return $this->hasMany(Sertifikasi::class, 'kandidat_id');
+}
+
 
 }

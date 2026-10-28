@@ -28,4 +28,14 @@ class Karyawan extends Model
     {
         return $this->hasMany(Keluarga::class, 'karyawan_id');
     }
+
+    public function pengalamanKerja()
+    {
+        return $this->hasMany(PengalamanKerja::class, 'karyawan_id');
+    }
+
+    public function sertifikasi()
+    {
+        return $this->hasMany(Sertifikasi::class, 'karyawan_id');
+    }
 }

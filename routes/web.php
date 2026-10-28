@@ -20,6 +20,9 @@ use App\Http\Controllers\SalesVisitTrendController;   // ← h jadi H
 use App\Http\Controllers\TrendPageController;          // ← TAMBAH INI
 use App\Http\Controllers\HrdController;
 use App\Http\Controllers\KeluargaController;
+use App\Http\Controllers\PendidikanController;
+use App\Http\Controllers\PengalamanKerjaController;
+use App\Http\Controllers\SertifikasiController;
 
 // ==========================
 // Public Routes (Login / Logout / Password Reset)
@@ -258,6 +261,22 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/karyawan/{karyawan}/keluarga', [KeluargaController::class, 'store'])->name('keluarga.store');
     Route::put('/keluarga/{keluarga}', [KeluargaController::class, 'update'])->name('keluarga.update');
     Route::delete('/keluarga/{keluarga}', [KeluargaController::class, 'destroy'])->name('keluarga.destroy');
+
+    Route::get('/pendidikan', [PendidikanController::class, 'index'])->name('pendidikan.index');
+    Route::post('/pendidikan', [PendidikanController::class, 'storePage'])->name('pendidikan.store-page');
+    Route::post('/karyawan/{karyawan}/pendidikan', [PendidikanController::class, 'store'])->name('pendidikan.store');
+    Route::put('/pendidikan/{pendidikan}', [PendidikanController::class, 'update'])->name('pendidikan.update');
+    Route::delete('/pendidikan/{pendidikan}', [PendidikanController::class, 'destroy'])->name('pendidikan.destroy');
+
+    Route::post('/karyawan/{karyawan}/pengalaman-kerja', [PengalamanKerjaController::class, 'store'])->name('pengalaman-kerja.store');
+    Route::post('/kandidat/{kandidat}/pengalaman-kerja', [PengalamanKerjaController::class, 'storeForKandidat'])->name('pengalaman-kerja.kandidat.store');
+    Route::put('/pengalaman-kerja/{pengalaman}', [PengalamanKerjaController::class, 'update'])->name('pengalaman-kerja.update');
+    Route::delete('/pengalaman-kerja/{pengalaman}', [PengalamanKerjaController::class, 'destroy'])->name('pengalaman-kerja.destroy');
+
+    Route::post('/karyawan/{karyawan}/sertifikasi', [SertifikasiController::class, 'store'])->name('sertifikasi.store');
+    Route::post('/kandidat/{kandidat}/sertifikasi', [SertifikasiController::class, 'storeForKandidat'])->name('sertifikasi.kandidat.store');
+    Route::put('/sertifikasi/{sertifikasi}', [SertifikasiController::class, 'update'])->name('sertifikasi.update');
+    Route::delete('/sertifikasi/{sertifikasi}', [SertifikasiController::class, 'destroy'])->name('sertifikasi.destroy');
 });
 
 // ==========================
@@ -272,5 +291,3 @@ Route::prefix('hrd')->name('hrd.')->group(function () {
     Route::post('/{id}/jadikan-karyawan', [HrdController::class, 'jadikanKaryawan'])
         ->name('jadikan-karyawan');
 });
-
-
