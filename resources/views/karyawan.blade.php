@@ -1,17 +1,29 @@
 @extends('layout.main')
 
 @section('content')
-<div class="pt-20 px-6">
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-2xl font-bold">Data Karyawan</h1>
-            <p class="text-sm text-gray-500">Hasil konversi dari kandidat yang berstatus diterima</p>
-        </div>
+
+<div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl font-bold">Data Karyawan</h1>
+        <p class="text-sm text-gray-500">
+            Hasil konversi dari kandidat yang berstatus diterima
+        </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+        <button type="button"
+                onclick="openPdfModal()"
+                class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+            <i class="fas fa-file-pdf mr-1"></i> Export PDF
+        </button>
+
         <a href="{{ route('hrd.index') }}"
            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
             <i class="fas fa-users mr-1"></i> Rekrutmen
         </a>
     </div>
+</div>
+
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -152,6 +164,87 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal Export PDF -->
+<div id="pdfModal"
+     class="hidden fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl">
+        <div class="flex items-center justify-between bg-red-600 text-white px-5 py-4 rounded-t-xl">
+            <div>
+                <h2 class="font-semibold text-lg">
+                    <i class="fas fa-file-pdf mr-2"></i>Export Data Karyawan
+                </h2>
+                <p class="text-xs text-red-100 mt-1">Pilih jenis PDF yang ingin diunduh</p>
+            </div>
+
+            <button type="button"
+                    onclick="closePdfModal()"
+                    class="text-2xl leading-none px-2"
+                    aria-label="Tutup">&times;</button>
+        </div>
+
+        <div class="p-5 space-y-4">
+            <button type="button"
+                    onclick="showPdfDetail()"
+                    class="w-full border border-gray-200 rounded-lg p-4 text-left hover:bg-red-50 hover:border-red-300">
+                <div class="font-semibold text-gray-800">
+                    <i class="fas fa-user text-red-600 mr-2"></i>
+                    PDF Detail Karyawan
+                </div>
+                <p class="text-sm text-gray-500 mt-1">
+                    Unduh data lengkap satu karyawan, termasuk pendidikan,
+                    pengalaman kerja, sertifikasi, dan keluarga.
+                </p>
+            </button>
+
+            <div id="pdfDetailChooser" class="hidden border rounded-lg p-4">
+                <label for="pdfKaryawanId"
+                       class="block text-sm font-medium text-gray-700 mb-2">
+                    Pilih karyawan
+                </label>
+
+                <select id="pdfKaryawanId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option value="">-- Pilih karyawan --</option>
+                    @foreach ($karyawan as $k)
+                        <option value="{{ $k->id }}">
+                            {{ $k->nama_lengkap }}{{ $k->nik ? ' - '.$k->nik : '' }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="button"
+                        onclick="downloadPdfDetail()"
+                        class="w-full mt-3 bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-700">
+                    <i class="fas fa-download mr-1"></i> Unduh PDF Detail
+                </button>
+            </div>
+
+            <button type="button"
+                    onclick="downloadPdfRekap()"
+                    class="w-full border border-gray-200 rounded-lg p-4 text-left hover:bg-red-50 hover:border-red-300">
+                <div class="font-semibold text-gray-800">
+                    <i class="fas fa-table text-red-600 mr-2"></i>
+                    PDF Rekap Semua Karyawan
+                </div>
+                <p class="text-sm text-gray-500 mt-1">
+                    Unduh seluruh data karyawan dalam bentuk tabel rekap.
+                </p>
+            </button>
+        </div>
+
+        <div class="flex justify-end px-5 pb-5">
+            <button type="button"
+                    onclick="closePdfModal()"
+                    class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
+                Batal
+            </button>
+        </div>
+    </div>
+</div>
+
 
 <!-- ==================== Modal Keluarga ==================== -->
 <div id="keluargaModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
@@ -523,5 +616,38 @@ document.addEventListener('keydown', event => {
     else if (!document.getElementById('keluargaDeleteModal').classList.contains('hidden')) closeKeluargaDelete();
     else if (!document.getElementById('keluargaModal').classList.contains('hidden')) closeKeluargaModal();
 });
+
+
+function openPdfModal() {
+    document.getElementById('pdfModal').classList.remove('hidden');
+}
+
+function closePdfModal() {
+    document.getElementById('pdfModal').classList.add('hidden');
+    document.getElementById('pdfDetailChooser').classList.add('hidden');
+}
+
+function showPdfDetail() {
+    document.getElementById('pdfDetailChooser').classList.remove('hidden');
+    document.getElementById('pdfKaryawanId').focus();
+}
+
+function downloadPdfDetail() {
+    const id = document.getElementById('pdfKaryawanId').value;
+
+    if (!id) {
+        alert('Pilih karyawan terlebih dahulu.');
+        return;
+    }
+
+    window.location.href =
+        "{{ url('/karyawan') }}/" + encodeURIComponent(id) + "/export-pdf";
+}
+
+function downloadPdfRekap() {
+    window.location.href = "{{ route('karyawan.pdf.rekap') }}";
+}
+
+
 </script>
 @endsection

@@ -23,6 +23,7 @@ use App\Http\Controllers\KeluargaController;
 use App\Http\Controllers\PendidikanController;
 use App\Http\Controllers\PengalamanKerjaController;
 use App\Http\Controllers\SertifikasiController;
+use App\Http\Controllers\KaryawanPdfController;
 
 // ==========================
 // Public Routes (Login / Logout / Password Reset)
@@ -290,4 +291,16 @@ Route::prefix('hrd')->name('hrd.')->group(function () {
 
     Route::post('/{id}/jadikan-karyawan', [HrdController::class, 'jadikanKaryawan'])
         ->name('jadikan-karyawan');
+
+// ==========================
+// PDF Karyawan Routes
+// ==========================
+
+Route::get('/karyawan/export-pdf', [KaryawanPdfController::class, 'rekap'])
+    ->name('karyawan.pdf.rekap');
+
+Route::get('/karyawan/{karyawan}/export-pdf', [KaryawanPdfController::class, 'detail'])
+    ->name('karyawan.pdf.detail');
+
+
 });
